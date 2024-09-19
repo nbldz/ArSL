@@ -1,0 +1,131 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr 17 01:22:14 2024
+
+@author: nbl
+"""
+
+from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
+import pickle 
+import arabic_reshaper
+from bidi.algorithm import get_display
+from modules import *
+from MP_holistic_styled_landmarks import mp_holistic,draw_styled_landmarks
+from mediapipe_detection import mediapipe_detection
+from keypoints_extraction import extract_keypoints
+import keras
+from folder_setup import *
+from visualization import prob_viz,colors
+from sklearn.neighbors import KNeighborsClassifier
+#from tkinter import *
+#import tkinter as tk
+sequence = []
+sentence = []
+Fact= []
+rr2 =str(0)
+threshold = 0.5
+tt=np.zeros(2136)
+#model = keras.models.load_model(r'D:\sharjah\sign\nblsignvideo\Model\lstm_model.h5')
+# load the model from disk
+model = pickle.load(open(r'D:\sharjah\sign\nblsignvideo\results(6)\RL_Model.pkl', 'rb'))
+#result = loaded_model.predict(X_test) 
+ii=0
+with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+    cap = cv2.VideoCapture(r'D:\base\sign\train\0001\01_0001_(10_03_21_20_37_17)_c.mp4')
+    # cap = cv2.VideoCapture()
+
+    while cap.isOpened():
+
+
+        ret, frame = cap.read()
+        if ret == True:
+
+
+            image, results = mediapipe_detection(frame, holistic)
+            draw_styled_landmarks(image, results)
+            ii=ii+1
+            filename22 =ii
+           
+            cv2.imshow('Arabic_SLR', image)
+            x=50
+            y=100
+            w=700
+            h=1000
+            crop_image = image[x:w, y:h]
+            cv2.imwrite('%d.png' % filename22, crop_image) 
+            
+            if cv2.waitKey(10) & 0xFF == ord('q'):
+                 break          
+    
+            keypoints = extract_keypoints(results)
+            z = keypoints.shape
+            tt[:z[0]]=keypoints
+            sequence.append(tt)
+            
+        else: 
+            break
+    cap.release()
+    cv2.destroyAllWindows()
+        #sequence = sequence[-30:]
+    hh=len(sequence)
+    if len(sequence) == hh:
+        res = model.predict((sequence))
+        print(actions[np.argmax(res)])
+        rr=(actions[np.argmax(res)])
+        rr='باسم الله'
+        rr3 = arabic_reshaper.reshape(rr)
+        rr2 = get_display(rr3)
+        #rr2 = [rr2[::-1]]
+                    
+        #if res[np.argmax(res)] > threshold: 
+        # if len(sequence) > 0:
+        #     if len(sentence) > 0: 
+        #         if actions[np.argmax(res)] != sentence[-1]:
+        #             sentence.append(actions[np.argmax(res)])
+        #     else:
+        #         sentence.append(actions[np.argmax(res)])
+
+        # if len(sentence) > 5: 
+        #     sentence = sentence[-5:]
+            
+
+        
+        #image = prob_viz(res, actions, image, colors)
+        
+    #if type(rr2) is str:
+    cat_image = Image.fromarray(image.astype('uint8'), 'RGB')  
+    #cat_image = Image.fromarray(np.uint8(image)).convert('RGB')
+    # drawing_on_img = ImageDraw.Draw(cat_image)
+    # #font = ImageFont.truetype('Pak Nastaleeq.ttf',size=15)
+    # text_color = (201,50,250)
+    # text_coordinates = (10,50)
+    # drawing_on_img.text(text_coordinates,rr2,fill='black')
+    # cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
+    # cv2.putText(image, ' '.join(sentence), (3,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+   
+    # cv2.putText(image,(rr2), (120,200), 
+                           # cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255, 0), 4, cv2.LINE_AA)
+    text=rr2
+    drawing_on_img = ImageDraw.Draw(cat_image)
+    font = ImageFont.truetype(r"C:\Users\nbl\Downloads\Sahel.ttf",size=70)
+    text_color = (201,50,250)
+    text_coordinates = (0,0)
+    drawing_on_img.text(text_coordinates,text,font=font,fill='black')
+    cat_image.save("text_on_test_imager.png")
+    
+    pix = np.array(cat_image)
+    
+
+    cv2.imshow('Action_Recognition2', pix)
+    if cv2.waitKey(10) & 0xFF == ord('q'):
+       cap.release()
+       cv2.destroyAllWindows()
+    cv2.waitKey(100000)
+    cv2.destroyAllWindows()
+                     
+    
+    
+    
+
+        
