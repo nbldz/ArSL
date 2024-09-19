@@ -19,3 +19,6 @@ Once you have the hand landmarks, you can process them with a sequence model. Tr
 Input to Transformers: You can use the hand landmark coordinates over time as inputs to a Transformer model. Depending on your approach, you might treat each frame of hand coordinates as a "token."
 Sign Language to Text: The model would learn to map sequences of hand landmarks (or gestures) to corresponding Arabic words or phrases in text.
 
+![Figure 2024-07-26 121253](https://github.com/user-attachments/assets/b40ca37e-3cbd-4490-8b71-d6c291c96416)
+![accur](https://github.com/user-attachments/assets/d64a8683-96bb-450d-bbfa-ecda4bc5ba90)
+![__results___23_1](https://github.com/user-attachments/assets/9cd8aae4-fd7e-4313-9849-b6dcb7ca940d)
